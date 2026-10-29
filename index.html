@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="description" content="BioMant-DSL Compiler: analizador léxico y sintáctico de órdenes de mantenimiento biomédico.">
+<title>BioMant-DSL Compiler</title>
+<style>
+:root{
+  --bg:#07101f;--bg2:#0b1427;--panel:#111c31;--panel2:#16233c;--line:#263652;
+  --text:#e7eef9;--muted:#8ea1bd;--brand:#58d4c7;--brand2:#4f8cff;--ok:#31c48d;
+  --warn:#f7b955;--bad:#ff6b7d;--code:#08111f;--shadow:0 20px 60px rgba(0,0,0,.28);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:radial-gradient(circle at 20% 0%,rgba(79,140,255,.14),transparent 30%),var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh}
+button,input,textarea{font:inherit}
+button{cursor:pointer}
+.shell{max-width:1440px;margin:auto;padding:0 26px 36px}
+header{height:76px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.08);position:sticky;top:0;background:rgba(7,16,31,.88);backdrop-filter:blur(16px);z-index:20}
+.brand{display:flex;align-items:center;gap:12px;font-weight:900;letter-spacing:-.02em}.logo{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--brand),var(--brand2));display:grid;place-items:center;color:#06131d;font-weight:1000;box-shadow:0 10px 30px rgba(79,140,255,.2)}
+.brand small{display:block;color:var(--muted);font-size:.72rem;font-weight:600;letter-spacing:.02em;margin-top:1px}
+nav{display:flex;gap:8px}.navbtn{border:1px solid transparent;background:transparent;color:var(--muted);padding:10px 14px;border-radius:10px;font-weight:800;font-size:.86rem}.navbtn:hover,.navbtn.active{background:#14213a;color:#fff;border-color:#253754}
+.badge{padding:8px 12px;border-radius:999px;background:rgba(88,212,199,.1);border:1px solid rgba(88,212,199,.28);color:#9cf0e8;font-size:.78rem;font-weight:800}
+.hero{padding:46px 0 22px;display:grid;grid-template-columns:1.3fr .7fr;gap:24px;align-items:end}.hero h1{font-size:clamp(2.2rem,5vw,4.3rem);line-height:.98;margin:0;letter-spacing:-.05em}.hero h1 span{background:linear-gradient(90deg,#75eee0,#6f9dff);-webkit-background-clip:text;background-clip:text;color:transparent}.hero p{color:var(--muted);max-width:790px;font-size:1.02rem;line-height:1.7;margin:18px 0 0}.flow{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px}.step{border:1px solid var(--line);background:#0e192d;padding:10px 13px;border-radius:11px;color:#b9c7db;font-weight:750;font-size:.78rem}.step b{color:var(--brand);margin-right:6px}
+.view{display:none}.view.active{display:block}
+.grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(360px,.85fr);gap:20px}
+.card{background:linear-gradient(180deg,rgba(20,33,58,.94),rgba(13,24,43,.94));border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);overflow:hidden}.cardHead{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:16px}.cardHead h2,.cardHead h3{margin:0;font-size:1rem}.eyebrow{font-size:.72rem;color:var(--brand);font-weight:900;letter-spacing:.12em;text-transform:uppercase}.cardBody{padding:20px}
+.drop{border:1.5px dashed #385173;border-radius:18px;min-height:240px;display:grid;place-items:center;text-align:center;padding:28px;position:relative;background:linear-gradient(180deg,rgba(79,140,255,.045),rgba(88,212,199,.03));transition:.2s}.drop.drag,.drop:hover{border-color:var(--brand);background:rgba(88,212,199,.06);transform:translateY(-1px)}.drop input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}.uploadIcon{width:64px;height:64px;margin:auto;border-radius:18px;background:linear-gradient(145deg,rgba(88,212,199,.18),rgba(79,140,255,.16));border:1px solid rgba(88,212,199,.25);display:grid;place-items:center;font-size:1.7rem}.drop h3{margin:14px 0 7px;font-size:1.1rem}.drop p{margin:0;color:var(--muted);font-size:.86rem;line-height:1.6}.drop strong{color:#dce8f8}.fileInfo{display:none;margin-top:14px;padding:13px 14px;border:1px solid #2b435f;border-radius:12px;background:#0b1628;align-items:center;justify-content:space-between;gap:12px}.fileInfo.show{display:flex}.fileInfo .meta{min-width:0}.fileInfo b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.fileInfo small{color:var(--muted)}
+.btnRow{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}.btn{border:1px solid var(--line);background:#172640;color:#dce7f6;padding:10px 14px;border-radius:10px;font-weight:850;font-size:.83rem}.btn:hover{filter:brightness(1.08)}.btn.primary{background:linear-gradient(135deg,#48cabc,#4c88ff);border:0;color:#06111b}.btn.ghost{background:transparent}.btn.danger{color:#ff9aaa;border-color:#5a2d3a;background:#241725}.btn:disabled{opacity:.45;cursor:not-allowed}
+.editor{width:100%;min-height:337px;resize:vertical;background:var(--code);color:#d8e6f7;border:1px solid #263958;border-radius:14px;padding:16px;outline:none;font:13px/1.75 "SFMono-Regular",Consolas,"Liberation Mono",monospace;tab-size:2}.editor:focus{border-color:#4d83cb;box-shadow:0 0 0 3px rgba(79,140,255,.12)}
+.statusbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px;color:var(--muted);font-size:.76rem}.statusbar .dot{width:8px;height:8px;border-radius:50%;background:#657893;display:inline-block;margin-right:6px}.statusbar .dot.ok{background:var(--ok)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}.kpi{background:#101c30;border:1px solid var(--line);border-radius:14px;padding:15px}.kpi span{color:var(--muted);font-size:.72rem;display:block}.kpi strong{display:block;font-size:1.08rem;margin-top:4px}.kpi.ok{border-color:#275845;background:rgba(49,196,141,.05)}.kpi.bad{border-color:#603442;background:rgba(255,107,125,.05)}
+.phaseTabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}.phaseBtn{border:1px solid var(--line);background:#0e1a2e;color:var(--muted);padding:9px 12px;border-radius:10px;font-weight:800;font-size:.78rem}.phaseBtn.active{color:#07141b;background:var(--brand);border-color:var(--brand)}.pane{display:none}.pane.active{display:block}
+.tableWrap{overflow:auto;border:1px solid var(--line);border-radius:13px}table{border-collapse:collapse;width:100%;min-width:650px;font-size:.79rem}th,td{padding:10px 12px;border-bottom:1px solid #21324d;text-align:left;vertical-align:top}th{background:#0f1b2f;color:#8fa6c5;font-size:.7rem;text-transform:uppercase;letter-spacing:.05em}tr:last-child td{border-bottom:0}.tok{display:inline-block;background:rgba(79,140,255,.12);color:#9bbcff;border:1px solid rgba(79,140,255,.18);padding:3px 7px;border-radius:7px;font:700 .72rem ui-monospace,monospace}.tok.kw{background:rgba(88,212,199,.1);color:#88e7dd;border-color:rgba(88,212,199,.18)}.tok.bad{background:rgba(255,107,125,.1);color:#ff9aa7;border-color:rgba(255,107,125,.22)}
+.alert{padding:14px 15px;border-radius:12px;border:1px solid #2a415e;background:#0e1a2c;color:#bdd0e8;font-size:.84rem;line-height:1.6}.alert.ok{border-color:#245c47;background:rgba(49,196,141,.07);color:#a7efd2}.alert.bad{border-color:#64323f;background:rgba(255,107,125,.07);color:#ffc0c8}.empty{padding:34px 20px;text-align:center;color:var(--muted);border:1px dashed #334761;border-radius:13px;background:#0b1627}.empty b{display:block;color:#cbd8e9;margin-bottom:4px}
+.codebox{background:#07111f;border:1px solid #243854;border-radius:12px;padding:14px 16px;overflow:auto;color:#cfe0f5;font:12.5px/1.65 ui-monospace,Consolas,monospace;white-space:pre-wrap}.grammarGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.mini{border:1px solid var(--line);background:#0d182a;border-radius:12px;padding:13px}.mini b{font-size:.78rem}.mini code{display:block;color:#91e7df;margin-top:7px;font-size:.75rem;word-break:break-word}
+.treeWrap{overflow:auto;padding:12px 6px 24px}.tree{min-width:780px;display:flex;flex-direction:column;align-items:center}.node{padding:8px 11px;border:1px solid #3f5a7a;border-radius:8px;background:#10203a;color:#dce8f8;font:700 .72rem ui-monospace,monospace;white-space:nowrap}.node.root{background:linear-gradient(135deg,#2f928a,#3d6bc2);border:0}.branches{display:flex;gap:10px;position:relative;padding-top:30px;margin-top:0}.branches:before{content:"";position:absolute;top:15px;left:3%;right:3%;height:1px;background:#405975}.branch{display:flex;flex-direction:column;align-items:center;position:relative}.branch:before{content:"";position:absolute;top:-15px;height:15px;width:1px;background:#405975}.leaf{margin-top:8px;padding:6px 8px;border-radius:7px;background:#0c192d;border:1px solid #29405d;color:#9eb4cf;font:600 .68rem ui-monospace,monospace}
+.docs{display:grid;grid-template-columns:1fr 1fr;gap:20px}.docSection{background:linear-gradient(180deg,#111d32,#0d182a);border:1px solid var(--line);border-radius:16px;padding:20px}.docSection h3{margin:0 0 10px}.docSection p,.docSection li{color:#a7b8ce;font-size:.86rem;line-height:1.7}.docSection ul{padding-left:20px}.spec{display:grid;gap:9px}.specRow{display:grid;grid-template-columns:150px 1fr;gap:12px;border-bottom:1px solid #20314a;padding:9px 0;font-size:.8rem}.specRow:last-child{border:0}.specRow span:first-child{color:#90a6c4}.specRow code{color:#8ee8df}
+@media(max-width:980px){header{position:relative}.hero{grid-template-columns:1fr}.flow{justify-content:flex-start}.grid,.docs{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}.badge{display:none}}
+@media(max-width:680px){.shell{padding:0 14px 28px}header{height:auto;padding:14px 0;align-items:flex-start;gap:12px}.brand small{display:none}nav{overflow:auto;max-width:60vw}.navbtn{padding:8px 10px;font-size:.74rem}.hero{padding-top:30px}.hero p{font-size:.9rem}.kpis{grid-template-columns:1fr 1fr}.grammarGrid{grid-template-columns:1fr}.cardBody{padding:15px}.drop{min-height:210px}.specRow{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="shell">
+<header>
+  <div class="brand"><div class="logo">B+</div><div>BioMant-DSL<small>Biomedical Maintenance Compiler</small></div></div>
+  <nav>
+    <button class="navbtn active" data-view="compiler">Compiler</button>
+    <button class="navbtn" data-view="results">Resultados</button>
+    <button class="navbtn" data-view="docs">Documentación</button>
+  </nav>
+  <div class="badge">Léxico + Sintáctico</div>
+</header>
+
+<section class="hero">
+  <div>
+    
+    <h1>BioMant <span>Compiler</span></h1>
+    <p>Revisa órdenes de mantenimiento de equipos biomédicos. Carga un archivo <strong>.txt</strong> o <strong>.dsl</strong> y analiza su contenido.</p>
+  </div>
+  <div class="flow"><div class="step"><b>01</b>Archivo</div><div class="step"><b>02</b>Léxico</div><div class="step"><b>03</b>Sintáctico</div><div class="step"><b>04</b>Resultado</div></div>
+</section>
+
+<main>
+<section id="view-compiler" class="view active">
+  <div class="grid">
+    <div class="card">
+      <div class="cardHead"><div><div class="eyebrow">1. Entrada</div><h2>Cargar archivo de orden</h2></div><span style="color:var(--muted);font-size:.76rem">.txt · .dsl</span></div>
+      <div class="cardBody">
+        <div id="dropzone" class="drop">
+          <input id="fileInput" type="file" accept=".txt,.dsl,text/plain">
+          <div>
+            <div class="uploadIcon">⇧</div>
+            <h3>Arrastra tu archivo aquí</h3>
+            <p>o <strong>haz clic para seleccionarlo</strong><br>Una orden por archivo · máximo 2 MB</p>
+          </div>
+        </div>
+        <div id="fileInfo" class="fileInfo">
+          <div class="meta"><b id="fileName">—</b><small id="fileMeta">—</small></div>
+          <button id="removeFile" class="btn danger">Quitar</button>
+        </div>
+        <div class="btnRow">
+          <button id="compileBtn" class="btn primary">▶ Analizar archivo</button>
+          <button id="exampleBtn" class="btn">Cargar ejemplo</button>
+          <button id="downloadSampleBtn" class="btn ghost">Descargar plantilla</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="cardHead"><div><div class="eyebrow">2. Código</div><h2>Editor DSL</h2></div><span id="lineCount" style="color:var(--muted);font-size:.76rem">0 líneas</span></div>
+      <div class="cardBody">
+<textarea id="editor" class="editor" spellcheck="false" placeholder="Carga un archivo o escribe una orden BioMant-DSL..."></textarea>
+        <div class="statusbar"><span><i id="editorDot" class="dot"></i><span id="editorStatus">Esperando entrada</span></span><span>UTF-8 · BioMant-DSL</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:20px">
+    <div class="cardHead"><div><div class="eyebrow">Ejemplo</div><h3>Estructura de una orden</h3></div></div>
+    <div class="cardBody">
+      <div class="grammarGrid">
+        <div class="codebox">OT {
+  EQUIPO EQ-VEN-023
+  TIPO CORRECTIVO
+  PRIORIDAD ALTA
+  ACCION CALIBRAR
+  FECHA 2026-10-29
+  TECNICO TEC-014
+}</div>
+        <div class="grammarGrid">
+          <div class="mini"><b>Equipo</b><code>EQ-[A-Z]{3}-[0-9]{3}</code></div>
+          <div class="mini"><b>Técnico</b><code>TEC-[0-9]{3}</code></div>
+          <div class="mini"><b>Tipo</b><code>PREVENTIVO | CORRECTIVO</code></div>
+          <div class="mini"><b>Prioridad</b><code>BAJA | MEDIA | ALTA | CRITICA</code></div>
+          <div class="mini"><b>Acción</b><code>INSPECCIONAR | LIMPIAR | CALIBRAR | REPARAR | REEMPLAZAR</code></div>
+          <div class="mini"><b>Fecha</b><code>AAAA-MM-DD</code></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="view-results" class="view">
+  <div class="kpis">
+    <div id="kpiTokens" class="kpi"><span>Tokens</span><strong>0</strong></div>
+    <div id="kpiLex" class="kpi"><span>Análisis léxico</span><strong>Pendiente</strong></div>
+    <div id="kpiSyn" class="kpi"><span>Análisis sintáctico</span><strong>Pendiente</strong></div>
+    <div id="kpiTime" class="kpi"><span>Tiempo</span><strong>0 ms</strong></div>
+  </div>
+
+  <div class="card">
+    <div class="cardHead"><div><div class="eyebrow">Análisis</div><h2>Resultados</h2></div><span id="resultStamp" style="color:var(--muted);font-size:.76rem">Sin ejecutar</span></div>
+    <div class="cardBody">
+      <div class="phaseTabs">
+        <button class="phaseBtn active" data-pane="lex">3.1 Análisis léxico</button>
+        <button class="phaseBtn" data-pane="syn">3.2 Análisis sintáctico</button>
+        <button class="phaseBtn" data-pane="tree">Árbol sintáctico</button>
+        <button class="phaseBtn" data-pane="rules">Reglas / GLC</button>
+      </div>
+      <div id="pane-lex" class="pane active"><div class="empty"><b>Sin análisis</b>Carga o escribe una orden y pulsa “Analizar archivo”.</div></div>
+      <div id="pane-syn" class="pane"><div class="empty"><b>Sin análisis sintáctico</b>El resultado aparecerá aquí.</div></div>
+      <div id="pane-tree" class="pane"><div class="empty"><b>Sin árbol</b>El árbol aparece cuando la orden es válida.</div></div>
+      <div id="pane-rules" class="pane">
+        <div class="codebox">G = (V, T, P, S)
+
+V = { &lt;orden&gt;, &lt;equipo&gt;, &lt;tipo&gt;, &lt;prioridad&gt;, &lt;accion&gt;, &lt;fecha&gt;, &lt;tecnico&gt; }
+S = &lt;orden&gt;
+
+P:
+&lt;orden&gt; ::= OT LBRACE &lt;equipo&gt; &lt;tipo&gt; &lt;prioridad&gt; &lt;accion&gt; &lt;fecha&gt; &lt;tecnico&gt; RBRACE
+&lt;equipo&gt; ::= EQUIPO ID_EQUIPO
+&lt;tipo&gt; ::= TIPO TIPO_VAL
+&lt;prioridad&gt; ::= PRIORIDAD PRIORIDAD_VAL
+&lt;accion&gt; ::= ACCION ACCION_VAL
+&lt;fecha&gt; ::= FECHA FECHA_VAL
+&lt;tecnico&gt; ::= TECNICO ID_TECNICO</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="view-docs" class="view">
+  <div class="docs">
+    <div class="docSection">
+      <div class="eyebrow">Información</div><h3>¿Qué hace BioMant-DSL?</h3>
+      <p>BioMant-DSL permite escribir y revisar órdenes de mantenimiento de equipos biomédicos con un lenguaje simple.</p>
+      <ul><li>Reconoce palabras y lexemas.</li><li>Revisa códigos, fechas y valores con expresiones regulares.</li><li>Comprueba el orden con una GLC.</li><li>Muestra el árbol sintáctico.</li></ul>
+    </div>
+    <div class="docSection">
+      <div class="eyebrow">Entrada</div><h3>Archivo</h3>
+      <div class="spec">
+        <div class="specRow"><span>Formato</span><code>.txt o .dsl</code></div>
+        <div class="specRow"><span>Codificación</span><code>UTF-8</code></div>
+        <div class="specRow"><span>Inicio</span><code>OT {</code></div>
+        <div class="specRow"><span>Cierre</span><code>}</code></div>
+        <div class="specRow"><span>Equipo</span><code>EQ-AAA-999</code></div>
+        <div class="specRow"><span>Técnico</span><code>TEC-999</code></div>
+      </div>
+    </div>
+    <div class="docSection">
+      <div class="eyebrow">Errores</div><h3>Tipos de error</h3>
+      <p><strong>Error léxico:</strong> aparece cuando un dato no cumple el formato esperado.</p>
+      <p><strong>Error sintáctico:</strong> aparece cuando faltan datos o están en un orden incorrecto.</p>
+    </div>
+    <div class="docSection">
+      <div class="eyebrow">Contenido</div><h3>Incluye</h3>
+      <p>Esta versión incluye tokens, lexemas, GLC, derivación y árbol sintáctico.</p>
+    </div>
+  </div>
+</section>
+</main>
+
+</div>
+
+<script>
+const sample=`OT {\n  EQUIPO EQ-VEN-023\n  TIPO CORRECTIVO\n  PRIORIDAD ALTA\n  ACCION CALIBRAR\n  FECHA 2026-10-29\n  TECNICO TEC-014\n}`;
+const editor=document.getElementById('editor'), fileInput=document.getElementById('fileInput'), dropzone=document.getElementById('dropzone');
+const fileInfo=document.getElementById('fileInfo'), fileName=document.getElementById('fileName'), fileMeta=document.getElementById('fileMeta');
+let currentFile=null;
+
+const escapeHTML=s=>String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+function setView(v){document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));document.getElementById('view-'+v).classList.add('active');document.querySelectorAll('.navbtn').forEach(b=>b.classList.toggle('active',b.dataset.view===v));}
+document.querySelectorAll('.navbtn').forEach(b=>b.onclick=()=>setView(b.dataset.view));
+document.querySelectorAll('.phaseBtn').forEach(b=>b.onclick=()=>{document.querySelectorAll('.phaseBtn').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.pane').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.getElementById('pane-'+b.dataset.pane).classList.add('active')});
+function updateEditorStatus(){const t=editor.value.trim();const lines=t?editor.value.split(/\r?\n/).length:0;document.getElementById('lineCount').textContent=`${lines} línea${lines===1?'':'s'}`;document.getElementById('editorStatus').textContent=t?'Código disponible':'Esperando entrada';document.getElementById('editorDot').className='dot'+(t?' ok':'');}
+editor.addEventListener('input',updateEditorStatus);updateEditorStatus();
+
+function loadFile(f){
+  if(!f)return;
+  if(f.size>2*1024*1024){alert('El archivo supera el máximo de 2 MB.');return}
+  const ext=(f.name.split('.').pop()||'').toLowerCase();
+  if(!['txt','dsl'].includes(ext)){alert('Selecciona un archivo .txt o .dsl');return}
+  const r=new FileReader();r.onload=()=>{editor.value=r.result;currentFile=f;fileName.textContent=f.name;fileMeta.textContent=`${(f.size/1024).toFixed(1)} KB · ${ext.toUpperCase()}`;fileInfo.classList.add('show');updateEditorStatus()};r.readAsText(f,'UTF-8');
+}
+fileInput.addEventListener('change',e=>loadFile(e.target.files[0]));
+['dragenter','dragover'].forEach(ev=>dropzone.addEventListener(ev,e=>{e.preventDefault();dropzone.classList.add('drag')}));
+['dragleave','drop'].forEach(ev=>dropzone.addEventListener(ev,e=>{e.preventDefault();dropzone.classList.remove('drag')}));
+dropzone.addEventListener('drop',e=>loadFile(e.dataTransfer.files[0]));
+document.getElementById('removeFile').onclick=()=>{currentFile=null;fileInput.value='';fileInfo.classList.remove('show')};
+document.getElementById('exampleBtn').onclick=()=>{editor.value=sample;currentFile=null;fileInfo.classList.remove('show');updateEditorStatus()};
+document.getElementById('downloadSampleBtn').onclick=()=>{const blob=new Blob([sample],{type:'text/plain;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='orden_biomant_ejemplo.txt';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)};
+
+const patterns={
+ OT:/^OT$/, LBRACE:/^\{$/, RBRACE:/^\}$/,
+ EQUIPO:/^EQUIPO$/, TIPO:/^TIPO$/, PRIORIDAD:/^PRIORIDAD$/, ACCION:/^ACCION$/, FECHA:/^FECHA$/, TECNICO:/^TECNICO$/,
+ ID_EQUIPO:/^EQ-[A-Z]{3}-\d{3}$/,
+ TIPO_VAL:/^(PREVENTIVO|CORRECTIVO)$/,
+ PRIORIDAD_VAL:/^(BAJA|MEDIA|ALTA|CRITICA)$/,
+ ACCION_VAL:/^(INSPECCIONAR|LIMPIAR|CALIBRAR|REPARAR|REEMPLAZAR)$/,
+ FECHA_VAL:/^\d{4}-(0[1-9]|1[0-2])-([0-2]\d|3[01])$/,
+ ID_TECNICO:/^TEC-\d{3}$/
+};
+const tokenRegex={
+ OT:'OT',LBRACE:'\\{',RBRACE:'\\}',EQUIPO:'EQUIPO',TIPO:'TIPO',PRIORIDAD:'PRIORIDAD',ACCION:'ACCION',FECHA:'FECHA',TECNICO:'TECNICO',
+ ID_EQUIPO:'EQ-[A-Z]{3}-[0-9]{3}',TIPO_VAL:'PREVENTIVO|CORRECTIVO',PRIORIDAD_VAL:'BAJA|MEDIA|ALTA|CRITICA',ACCION_VAL:'INSPECCIONAR|LIMPIAR|CALIBRAR|REPARAR|REEMPLAZAR',FECHA_VAL:'AAAA-MM-DD',ID_TECNICO:'TEC-[0-9]{3}'
+};
+const expected=['OT','LBRACE','EQUIPO','ID_EQUIPO','TIPO','TIPO_VAL','PRIORIDAD','PRIORIDAD_VAL','ACCION','ACCION_VAL','FECHA','FECHA_VAL','TECNICO','ID_TECNICO','RBRACE'];
+const keywordSet=new Set(['OT','EQUIPO','TIPO','PRIORIDAD','ACCION','FECHA','TECNICO','LBRACE','RBRACE']);
+function classify(word){for(const [k,re] of Object.entries(patterns)){if(re.test(word))return k}return 'ERROR_LEXICO'}
+function tokenize(text){const out=[];text.split(/\r?\n/).forEach((line,li)=>{const clean=line.trim();if(!clean)return;const parts=clean.match(/\{|\}|[^\s{}]+/g)||[];parts.forEach(p=>out.push({line:li+1,lexeme:p,token:classify(p)}))});return out}
+function validateSyntax(tokens){const actual=tokens.map(t=>t.token);if(tokens.some(t=>t.token==='ERROR_LEXICO'))return{ok:false,msg:'No se puede completar el análisis sintáctico porque existen errores léxicos.'};
+  for(let i=0;i<Math.max(actual.length,expected.length);i++){if(actual[i]!==expected[i])return{ok:false,msg:`Se esperaba ${expected[i]||'fin de la orden'} en la posición ${i+1}, pero se encontró ${actual[i]||'fin de archivo'}.`}}
+  return{ok:true,msg:'La secuencia de tokens coincide con la Gramática Libre de Contexto de BioMant-DSL.'};
+}
+function validateDateLexeme(token){if(token.token!=='FECHA_VAL')return true;const [y,m,d]=token.lexeme.split('-').map(Number);const dt=new Date(y,m-1,d);return dt.getFullYear()===y&&dt.getMonth()===m-1&&dt.getDate()===d}
+function buildLexTable(tokens){
+  let rows=tokens.map((t,i)=>`<tr><td>${i+1}</td><td>${t.line}</td><td><code>${escapeHTML(t.lexeme)}</code></td><td><span class="tok ${keywordSet.has(t.token)?'kw':''} ${t.token==='ERROR_LEXICO'?'bad':''}">${t.token}</span></td><td><code>${escapeHTML(tokenRegex[t.token]||'No reconocido')}</code></td></tr>`).join('');
+  return `<div class="tableWrap"><table><thead><tr><th>#</th><th>Línea</th><th>Lexema</th><th>Token</th><th>Expresión regular / regla</th></tr></thead><tbody>${rows}</tbody></table></div>`
+}
+function buildDerivation(tokens){const v={};tokens.forEach(t=>v[t.token]=t.lexeme);return `&lt;orden&gt;\n⇒ OT { &lt;equipo&gt; &lt;tipo&gt; &lt;prioridad&gt; &lt;accion&gt; &lt;fecha&gt; &lt;tecnico&gt; }\n⇒ OT { EQUIPO ${escapeHTML(v.ID_EQUIPO)} &lt;tipo&gt; &lt;prioridad&gt; &lt;accion&gt; &lt;fecha&gt; &lt;tecnico&gt; }\n⇒ OT { EQUIPO ${escapeHTML(v.ID_EQUIPO)} TIPO ${escapeHTML(v.TIPO_VAL)} PRIORIDAD ${escapeHTML(v.PRIORIDAD_VAL)} ACCION ${escapeHTML(v.ACCION_VAL)} FECHA ${escapeHTML(v.FECHA_VAL)} TECNICO ${escapeHTML(v.ID_TECNICO)} }`}
+function buildTree(tokens){const v={};tokens.forEach(t=>v[t.token]=t.lexeme);const branches=[['equipo','EQUIPO',v.ID_EQUIPO],['tipo','TIPO',v.TIPO_VAL],['prioridad','PRIORIDAD',v.PRIORIDAD_VAL],['accion','ACCION',v.ACCION_VAL],['fecha','FECHA',v.FECHA_VAL],['tecnico','TECNICO',v.ID_TECNICO]];
+ return `<div class="treeWrap"><div class="tree"><div class="node root">&lt;orden&gt;</div><div class="branches"><div class="branch"><div class="node">OT</div><div class="leaf">OT</div></div><div class="branch"><div class="node">{</div><div class="leaf">LBRACE</div></div>${branches.map(b=>`<div class="branch"><div class="node">&lt;${b[0]}&gt;</div><div class="leaf">${b[1]}<br>${escapeHTML(b[2]||'')}</div></div>`).join('')}<div class="branch"><div class="node">}</div><div class="leaf">RBRACE</div></div></div></div></div>`}
+function setKpi(id,val,state){const el=document.getElementById(id);el.querySelector('strong').textContent=val;el.className='kpi'+(state?' '+state:'')}
+function analyse(){
+ const start=performance.now();const text=editor.value.trim();
+ if(!text){alert('Carga un archivo o escribe una orden antes de analizar.');return}
+ let tokens=tokenize(text);
+ const invalidDate=tokens.find(t=>t.token==='FECHA_VAL'&&!validateDateLexeme(t));if(invalidDate)invalidDate.token='ERROR_LEXICO';
+ const lexOK=!tokens.some(t=>t.token==='ERROR_LEXICO');const syn=validateSyntax(tokens);const elapsed=Math.max(1,Math.round(performance.now()-start));
+ setKpi('kpiTokens',tokens.length,'');setKpi('kpiLex',lexOK?'Válido':'Con errores',lexOK?'ok':'bad');setKpi('kpiSyn',syn.ok?'Válido':'Con errores',syn.ok?'ok':'bad');setKpi('kpiTime',elapsed+' ms','');
+ document.getElementById('resultStamp').textContent=new Date().toLocaleTimeString('es-PE',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+ const lexMsg=lexOK?`<div class="alert ok" style="margin-bottom:12px"><strong>✓ Análisis léxico correcto.</strong> Todos los lexemas fueron reconocidos por las reglas definidas.</div>`:`<div class="alert bad" style="margin-bottom:12px"><strong>✕ Se detectaron errores léxicos.</strong> Revisa los elementos marcados como ERROR_LEXICO.</div>`;
+ document.getElementById('pane-lex').innerHTML=lexMsg+buildLexTable(tokens);
+ document.getElementById('pane-syn').innerHTML=`<div class="alert ${syn.ok?'ok':'bad'}"><strong>${syn.ok?'✓ Estructura válida':'✕ Error sintáctico'}</strong><br>${escapeHTML(syn.msg)}</div>${syn.ok?`<h3 style="font-size:.9rem;margin:18px 0 10px">Derivación por la izquierda</h3><div class="codebox">${buildDerivation(tokens)}</div>`:''}`;
+ document.getElementById('pane-tree').innerHTML=syn.ok?buildTree(tokens):`<div class="empty"><b>Árbol no disponible</b>Corrige primero los errores léxicos o sintácticos.</div>`;
+ setView('results');
+ document.querySelector('[data-pane="lex"]').click();
+}
+document.getElementById('compileBtn').onclick=analyse;
+</script>
+</body>
+</html>
